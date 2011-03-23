@@ -1,6 +1,9 @@
-Jester ported to mootools
-Result or syntax may vary
-But the code's much better
+Mootools ORM (like ActiveResource or Jester).
+
+Readme below may be a little bit outdated. To be rewritten.
+
+
+
 
   var Post = new Resource("Post")
   Post.find("all", function(p) {

@@ -1,0 +1,18 @@
+name: Resource
+filename: resource.js
+version: 0.5
+description: Lightweight javascript ORM based on mootools
+license: Public domain, http://unlicense.org
+copyright: Yaroslaff Fedin
+author: inviz
+category: Request
+tags: [orm, resource, jester]
+sources:
+  - "Source/Resource.js"
+  - "Source/Resource.Model.js"
+  - "Source/Resource.Model.Actions.js"
+  - "Source/Resource.Collection.js"
+  - "Source/Resource.Parser.js"
+  - "Source/Resource.Parser.JSON.js"
+  - "Source/Resource.Parser.HTML.js
+  - "Source/Resource.Parser.XML.js
