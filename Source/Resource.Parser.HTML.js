@@ -14,7 +14,7 @@ requires:
   
 provides:
   - Resource.Parser.HTML
- 
+
 ...
 */
 

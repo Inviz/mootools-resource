@@ -19,7 +19,7 @@ provides:
 */
 
 Resource.Model = new Class({
-  Implements: [new Options, new Events],
+  Implements: [Options, Events],
   
   initialize: function(attributes, existant_record, claiming) {
     this._claiming = claiming

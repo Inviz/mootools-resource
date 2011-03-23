@@ -45,4 +45,6 @@ Resource.Parser = new Class({
     }, this)
     return obj
   }
-})
+});
+
+Resource.prototype.options.parsers = Resource.Parser;

@@ -16,7 +16,8 @@ requires:
   - Core/Options
   - Core/Events
   - Core/Chain
-  
+  - String.Inflections
+
 provides:
   - Resource
  
@@ -41,7 +42,6 @@ Resource = new Class({
     associations: {}, //{users: ['Person', options]}
     prefix: '', //If prefix is 'true' it respects parent association's path
     custom: {}, //Name => method hash or an array of PUT methods
-    parsers: Resource.Parser,
     postprocess: function(data) {
       if (typeOf(data) != 'array' || data.some(function(e) { return e.length != 2})) return data
       return {
@@ -68,13 +68,12 @@ Resource = new Class({
     })
     
     this.klass = new Class({
-      Extends:Resource.Model
+      Extends: Resource.Model
     })
     Object.append(this.klass, this)
-    Object.append(this.klass.prototype, {resource: this})
-    Object.append(this.klass.prototype, this.setAssociations(this.options.associations))
-    Object.append(this.klass.prototype, this.setCustomActions(this.options.custom))
-    
+    this.klass.implement({resource: this})
+    this.klass.implement(this.setAssociations(this.options.associations))
+    this.klass.implement(this.setCustomActions(this.options.custom))
     return this.klass
   },
   
@@ -83,7 +82,7 @@ Resource = new Class({
     
     var obj = {}
     Object.each(associations, function(association, name) {      
-      var singular = name.singularize().camelize()
+      var singular = name.singularize().camelCase().capitalize()
       this['get' + singular] = function(data) {
         return new (this.resource.associations[name])(data, true)
       }
@@ -98,7 +97,7 @@ Resource = new Class({
         options.prefix = this.options.prefix
       }
       var assoc = this.associations[name] = new Resource(reflection, options)
-      var klsfd = name.camelize().pluralize()
+      var klsfd = name.camelCase().pluralize().capitalize()
       var singular = klsfd.singularize()
       obj['get' + singular] = function() {
         if (!this[name]) return;

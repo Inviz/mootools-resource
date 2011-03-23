@@ -44,7 +44,7 @@ Resource.Model.Actions = {
 };
 
 
-Resource.Model.implement({
+Resource.Model.extend({
   createAction: function(name, options) {
     if (!options) options = {}
     if (!options.action) options.action = Resource.Model.Actions[name]

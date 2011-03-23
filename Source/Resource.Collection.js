@@ -10,7 +10,7 @@ license: Public domain (http://unlicense.org).
 authors: Yaroslaff Fedin
 
 requires:
-  - Resource
+  - Resource.Model
   
 provides:
   - Resource.Collection
@@ -22,7 +22,7 @@ Resource.Collection = function(models) {
   return Object.append(models, this)
 };
 
-Resource.Collection.prototype = {
+Resource.Collection.extend({
   createAction: function(name) {
     return function() {
       var args = Array.prototype.slice.call(arguments, 0);
@@ -33,7 +33,7 @@ Resource.Collection.prototype = {
       if (callback) callback.call(this)
     }
   }
-};
+});
 
 Object.each(Resource.Model.Actions, function(action, name) {
   Resource.Collection.prototype[name] = Resource.Collection.createAction(action);
