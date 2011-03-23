@@ -39,11 +39,6 @@ Resource.Model = new Class({
            //try to get attribute resource_id
            //else assume that id is formatted like resource_123.
           var id = Resource.Model.id(key, this.getPrefix());
-          if (id) {
-            this.set('id', id);
-            this._new_record = false;
-          } 
-           break
         case 'object': case 'array':
           var complex = []
           for (var k in key) {
@@ -53,8 +48,14 @@ Resource.Model = new Class({
               this.setAttribute(k, key[k])
             }
           }
+        case 'string': case 'number':
+          var id = key;
       }
       
+      if (id) {
+        this.set('id', id);
+        this._new_record = false;
+      }
       
       if (this._claiming) {
         this.claim(this._claiming)

@@ -36,7 +36,7 @@ Resource = new Class({
       'destroy': '/:plural/:id',
       'new': '/:plural/new'
     },
-    requestOptions: {
+    request: {
       secure: false
     },
     associations: {}, //{users: ['Person', options]}
@@ -145,7 +145,7 @@ Resource = new Class({
   },
 
   getRequest: function() {
-    return new Request[this.options.format.toUpperCase()](this.options.requestOptions)
+    return new Request[this.options.format.toUpperCase()](this.options.request)
   },
   
   create: function(a, b) { //Ruby-style Model#create backward compat
@@ -157,13 +157,13 @@ Resource = new Class({
   },
   
   claim: function(thing) {
-    this.options.prefix = thing.prefix || (this.options.prefix && this.options.prefix.run ? this.options.prefix(thing) : this.options.prefix)
+    this.options.prefix = thing.prefix || (this.options.prefix && this.options.prefix.call ? this.options.prefix(thing) : this.options.prefix)
     return this
   },
   
   request: function(options, callback, model) {
     if (options.route) options.url = this.getFormattedURL(options.route, options);
-    if (options.data && options.data.run) options.data = options.data.call(model)
+    if (options.data && options.data.call) options.data = options.data.call(model)
     
     var req = this.getRequest();
     ['success', 'failure', 'request', 'complete'].each(function(e) {
@@ -233,8 +233,10 @@ Resource = new Class({
   },
   
   getURL: function(route, thing) {
-    var prefix = thing.prefix || (this.options.prefix && this.options.prefix.run ? this.options.prefix(thing) : this.options.prefix)
-    return Resource.interpolate((prefix + (this.options.urls[route] || route)), thing, this.options)
+    var prefix = thing.prefix || (this.options.prefix && this.options.prefix.call ? this.options.prefix(thing) : this.options.prefix);
+    var route = (this.options.urls[route] || route);
+    if (route.charAt(0) == '/' && prefix.charAt(prefix.length - 1) == '/') prefix = prefix.substring(0, prefix.length - 1);
+    return Resource.interpolate(prefix + route, thing, this.options)
   },
   
   locate: function(thing) {
@@ -249,7 +251,6 @@ Resource = new Class({
     return string.replace(/(?=\?)|\/?$/, '.' + this.options.format)
   }
 });
-
 
 !function() {
   
@@ -272,9 +273,9 @@ Resource = new Class({
       return fill(what, thing, opts)
     }
   }
-
+  var regex = /:((?:[a-zA-Z0-9]|::)+)/g;
   Resource.interpolate = function(str, thing, opts) {
-    return str.replace(/:((?:[a-zA-Z0-9]|::)+)/g, interpolation(thing, opts))
+    return str.replace(regex, interpolation(thing, opts))
   }
   
 }();

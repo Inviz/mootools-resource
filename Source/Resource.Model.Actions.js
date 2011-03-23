@@ -46,21 +46,20 @@ Resource.Model.Actions = {
 
 Resource.Model.extend({
   createAction: function(name, options) {
-    if (!options) options = {}
-    if (!options.action) options.action = Resource.Model.Actions[name]
-    
+    if (!options) options = {};
+    if (!options.action) options.action = Resource.Model.Actions[name];
     return function() {
       var args = Array.prototype.slice.call(arguments, 0);
       if (args.getLast()) var callback = args.pop();
-      Object.append(options, options.action.apply(this, args))
-      this.fireEvent('before' + name.capitalize())
-      var req = this.request(options, callback)        
+      Object.append(options, options.action.apply(this, args));
+      this.fireEvent('before' + name.capitalize());
+      var req = this.request(options, callback);
       return req.chain(function(data) {
         this.fireEvent('after' + name.capitalize(), data);
-        return req.callChain(data)
-      }.bind(this))
+        return req.callChain(data);
+      }.bind(this));
       
-      return this
+      return this;
     }
   },
   
@@ -84,5 +83,5 @@ Resource.Model.extend({
 })
 
 Object.each(Resource.Model.Actions, function(action, name) {
-  Resource.Model.prototype[name] = Resource.Model.createAction(action);
+  Resource.Model.prototype[name] = Resource.Model.createAction(name);
 });

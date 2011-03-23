@@ -16,4 +16,3 @@ sources:
   - "Source/Resource.Parser.JSON.js"
   - "Source/Resource.Parser.HTML.js"
   - "Source/Resource.Parser.XML.js"
-  - "Source/String.Inflections.js"

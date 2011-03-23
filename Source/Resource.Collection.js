@@ -36,5 +36,5 @@ Resource.Collection.extend({
 });
 
 Object.each(Resource.Model.Actions, function(action, name) {
-  Resource.Collection.prototype[name] = Resource.Collection.createAction(action);
+  Resource.Collection.prototype[name] = Resource.Collection.createAction(name);
 });
