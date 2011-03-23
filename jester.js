@@ -1,9 +1,5 @@
 var Jester = new Hash;
 Jester.Parser = new Class({
-  initialize: function(context) {
-    this.context = context
-    return this
-  },
   
   integer: function(value) {
     var parsed = parseInt(value);
@@ -68,7 +64,7 @@ Jester.Parser.XML = new Class({
 })
 
 Jester.Resource = new Class({
-  Implements: [new Options, new Events, new Chain],
+  Implements: [Options, Events, Chain],
 
   options: {
     format: 'json',
@@ -97,7 +93,7 @@ Jester.Resource = new Class({
 
   initialize: function(name, options) {
     
-    this.name = name
+    this.name = name;
     $extend(this.options, {
       singular: name.tableize().singularize(),
       plural: name.tableize().pluralize(),
@@ -147,12 +143,12 @@ Jester.Resource = new Class({
         if (!this[name]) return;
         return this[name]
       }
-			obj['get' + klsfd] = function() {
-				return assoc.claim(this)
-			}
-			obj['get' + klsfd + 'Association'] = function() {
-				return assoc.claim(this)
-			}
+      obj['get' + klsfd] = function() {
+        return assoc.claim(this)
+      }
+      obj['get' + klsfd + 'Association'] = function() {
+        return assoc.claim(this)
+      }
       obj['set' + singular] = function(value, existant) {
         return this[name] = new assoc(value, existant, this)
       }
@@ -188,9 +184,9 @@ Jester.Resource = new Class({
     return methods;
   },
 
-	getRequest: function() {
-	  return new Request[this.options.format.toUpperCase()](this.options.requestOptions)
-	},
+  getRequest: function() {
+    return new Request[this.options.format.toUpperCase()](this.options.requestOptions)
+  },
   
   create: function(a, b) { //Ruby-style Model#create backward compat
     return new (this.klass || this)(a, b)
@@ -199,51 +195,55 @@ Jester.Resource = new Class({
   init: function(a) {
     return this.create(a, true)
   },
-	
-	claim: function(thing) {
-		this.options.prefix = thing.prefix || (this.options.prefix && this.options.prefix.run ? this.options.prefix(thing) : this.options.prefix)
-		return this
-	},
+  
+  claim: function(thing) {
+    this.options.prefix = thing.prefix || (this.options.prefix && this.options.prefix.run ? this.options.prefix(thing) : this.options.prefix)
+    return this
+  },
   
   request: function(options, callback, model) {
-	  if (options.route) options.url = this.getFormattedURL(options.route, options);
-  	if (options.data && options.data.run) options.data = options.data.call(model)
-	  
-	  var req = this.getRequest();
-	  ['success', 'failure', 'request', 'complete'].each(function(e) {
-	    var cc = 'on' + e.capitalize()
-	    req.addEvent(e, function(data) {
-        data = this.handle.apply(this, arguments);
-	      if (this[cc]) data = this[cc](data);
-	      
+    if (options.route) options.url = this.getFormattedURL(options.route, options);
+    if (options.data && options.data.run) options.data = options.data.call(model)
+    
+    var req = this.getRequest();
+    ['success', 'failure', 'request', 'complete'].each(function(e) {
+      var cc = 'on' + e.capitalize()
+      req.addEvent(e, function(data) {
+        data = this[this[cc] ? cc : "handle"].apply(this, arguments);
         if (e == 'success') {
-        	if (callback) {
+          if (callback) {
             switch ($type(callback)) {
-        	    case "string":
-        	      this.fireEvent(callback, data);
-        	      break;
-        	    case "function":
-        	      if ($type(data) == "array") {
-        	        callback.apply(window, data)
-        	      } else {
-        	        callback(data);
-        	      }
+              case "string":
+                this.fireEvent(callback, data);
+                break;
+              case "function":
+                if ($type(data) == "array") {
+                  callback.apply(window, data)
+                } else {
+                  callback(data);
+                }
             }
           }
         }
-        
-        if (options[cc]) options[cc](data)
-        if (e == 'success') this.callChain(data)
-	    }.bind(this));
-	    return req;
-	  }, this)
-	  req.send(options)
-	  
-	  return req;
+
+        if (options[cc]) options[cc](data);
+        if (e == 'success') this.callChain(data);
+        model.fireEvent(e, data);
+      }.bind(this));
+      return req;
+    }, this)
+    req.send(options)
+    
+    return req;
+  },
+
+  onFailure: function(response) {
+    return this.getParser('json').parse(JSON.decode(response))
   },
   
   handle: function() {
-    var data = this.options.postprocess(this.getParser().parse.apply(this.getParser(), arguments));
+    var parser = this.getParser();
+    var data = this.options.postprocess(parser.parse.apply(parser, arguments));
     switch($type(data)) {
       case "array":
         return data.map(this.init.bind(this));
@@ -266,9 +266,10 @@ Jester.Resource = new Class({
     }
   },
   
-  getParser: function() {
-    if (!this.parser) this.parser = new (Jester.Parser[this.options.format.toUpperCase()])(this)
-    return this.parser  
+  getParser: function(format) {
+    var parser = Jester.Parser[(format || this.options.format).toUpperCase()];
+    if (!parser.instance) parser.instance = new parser;
+    return parser.instance;
   },
   
   getURL: function(route, thing) {
@@ -277,7 +278,7 @@ Jester.Resource = new Class({
   },
   
   locate: function(thing) {
-		return this.getURL('show', thing)
+    return this.getURL('show', thing)
   },
    
   getFormattedURL: function(route, thing) {
@@ -315,7 +316,7 @@ Jester.Resource = new Class({
     return str.replace(/:((?:[a-zA-Z0-9]|::)+)/g, interpolation(thing, opts))
   }
   
-})()
+})();
 
 Jester.Model = new Class({
   Extends: Hash,
@@ -328,7 +329,7 @@ Jester.Model = new Class({
     
     this.set(attributes);
     this._new_record = (existant_record == false) || !this.get('id');
-		return this;
+    return this;
   },
   
   set: function(key, value) {
@@ -339,22 +340,21 @@ Jester.Model = new Class({
         case 'element':
            //try to get attribute resource_id
            //else assume that id is formatted like resource_123.
-					var id = key.get(this.getPrefix() + '_id');
-					if (!id) if (id = key.get('id')) id = (id.match(new RegExp('^' + this.getPrefix() + '[_-]' + '(.*)$')), [null, null])[1];
+          var id = Jester.Model.$(key, this.getPrefix());
           if (id) {
             this.set('id', id);
             this._new_record = false;
           } 
- 					break
-				case 'object': case 'hash': case 'array':
-					var complex = []
-		      for (var k in key) {
-		        if (['array', 'object'].contains($type(key[k]))) {
-		          complex.push(k)
-		        } else {  
-		          this.setAttribute(k, key[k])
-		        }
-		      }
+           break
+        case 'object': case 'hash': case 'array':
+          var complex = []
+          for (var k in key) {
+            if (['array', 'object'].contains($type(key[k]))) {
+              complex.push(k)
+            } else {  
+              this.setAttribute(k, key[k])
+            }
+          }
       }
       
       
@@ -396,85 +396,105 @@ Jester.Model = new Class({
   },
   
   request: function(options, callback) {
-		return this.resource.request($extend(this.getClean(), options), callback, this)
+    return this.resource.request($extend(this.getClean(), options), callback, this)
   },
   
   getClean: function(){
     //Here we overcome JS's inability to have crossbrowser getters & setters
     //I wouldnt use these pseudoprivate _underscore properties otherwise
-		var clean = {};
-		for (var key in this){
-			if (
-			  key != 'prototype' && 
-			  key != 'resource' &&
-			  key.match(/^[^_$A-Z]/) && //doesnt start with _, $ or capital letter
-			  typeof(this[key]) != 'function'
-			) clean[key] = this[key];
-		}
-		return clean;
-	},
-	
-	getAttributes: function() {
-	  return this.getClean();
-	},
-	
-	isNew: function() {
-	  return this._new_record
-	},
-	
-	isDirty: function() {
-	  return this._defaults == this.getClean();
-	},
-	
-	onFailure: function() {
-	  console.log('Achtung')
-	},
-	
-	getPrefix: function() {
-	  return this.resource.options.singular
-	},
-	
-	getPrefixedClean: function() {
-	  var obj = {}
-	  var clean = this.getClean()
-	  delete clean.prefix
-	  obj[this.getPrefix()] = clean
-	  
-	  return obj
-	},
-	
-	getURL: function(route) {
-	  return this.resource.getURL(route || 'show', this)
-	},
-	
-	claim: function(what) {
-	  this.prefix = (this.resource.options.prefix_given) && this.resource.options.prefix.run ? this.resource.options.prefix(what) : what.prefix
-	  return this
-	}
+    var clean = {};
+    for (var key in this){
+      if (
+        key != 'prototype' && 
+        key != 'resource' &&
+        key.match(/^[^_$A-Z]/) && //doesnt start with _, $ or capital letter
+        typeof(this[key]) != 'function'
+      ) clean[key] = this[key];
+    }
+    return clean;
+  },
+  
+  getAttributes: function() {
+    return this.getClean();
+  },
+  
+  isNew: function() {
+    return this._new_record
+  },
+  
+  isDirty: function() {
+    return this._defaults == this.getClean();
+  },
+  
+  onFailure: function() {
+    console.error('Achtung', arguments);
+  },
+  
+  getPrefix: function() {
+    return this.resource.options.singular
+  },
+  
+  getData: function() {
+    return this.getPrefixedClean()
+  },
+  
+  getPrefixedClean: function() {
+    var obj = {}
+    var clean = this.getClean()
+    delete clean.prefix
+    obj[this.getPrefix()] = clean
+    
+    return obj
+  },
+  
+  getURL: function(route) {
+    return this.resource.getURL(route || 'show', this)
+  },
+  
+  claim: function(what) {
+    this.prefix = (this.resource.options.prefix_given) && this.resource.options.prefix.run ? this.resource.options.prefix(what) : what.prefix
+    return this
+  }
 });
+
+
+Jester.Model.$ = function(element, prefix) {
+  var id;
+  if (prefix) id = element.get(prefix + '_id');
+  if (!id && (id = element.get('id'))) {
+    var regex = '(.*)$';
+    if (prefix) {
+      regex = '^' + prefix + '[_-]' + regex;
+    } else {
+      regex = '_' + regex;
+    }
+    id = (id.match(new RegExp(regex)) || [null, null])[1];
+  }
+  return id;
+}
 
 Jester.Model.Actions = new Hash({
   save: function() {
-		if (!this._new_record) return Jester.Model.Actions.update.call(this)
-	  return {method: 'post', route: 'list', data: this.getPrefixedClean, onComplete: this.set.bind(this), onFailure: this.onFailure.bind(this)}
-	},
-	
-	destroy: function() {
-	  return {method: 'delete', route: 'destroy'}
-	},
-	
-	update: function() {
-	  return {method: 'put', data: this.getPrefixedClean, route: 'show'}
-	},
-	
-	reload: function() {
-	  if (!this.id) return this;
-  	return {method: 'get', route: 'show'}
-	},
-	
-	'new': function() {
-	  return {method: 'get', route: 'new', data: this.getPrefixedClean}
-	}
+    if (!this._new_record) return Jester.Model.Actions.update.call(this)
+    return {method: 'post', route: 'list', data: this.getData, onComplete: this.set.bind(this), onFailure: this.onFailure.bind(this)}
+  },
+  
+  destroy: function() {
+    return {method: 'delete', route: 'destroy'}
+  },
+  
+  update: function() {
+    return {method: 'put', data: this.getPrefixedClean, route: 'show'}
+  },
+  
+  reload: function() {
+    if (!this.id) return this;
+    return {method: 'get', route: 'show'}
+  },
+  
+  'new': function() {
+    return {method: 'get', route: 'new', data: this.getPrefixedClean}
+  }
 });
 
 Jester.Collection = new Class({
@@ -504,8 +524,12 @@ Jester.Model.extend({
   },
   
   createCustomAction: function(name, method, obj) {
+    if (method.method) {
+      obj = method;
+      method = obj.method;
+    }
     if (!this.options.urls[name]) this.options.urls[name] = '/:plural/:id/' + name
-    return Jester.Model.createAction(name, {
+    return Jester.Model.createAction(name, $extend({
       action: function (data) {
         return {
           onComplete: method == 'put' ? this.set.bind(this) : $lambda,
@@ -514,7 +538,7 @@ Jester.Model.extend({
       },
       route: name, 
       method: method
-    })
+    }, obj));
   }
 })
 
