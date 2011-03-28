@@ -16,7 +16,7 @@ requires:
   - Core/Options
   - Core/Events
   - Core/Chain
-  - String.Inflections
+  - String.Inflections/String.camelize
 
 provides:
   - Resource
