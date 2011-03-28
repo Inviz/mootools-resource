@@ -170,4 +170,4 @@ Resource.Model.id = function(element, prefix) {
     id = (id.match(new RegExp(regex)) || [null, null])[1];
   }
   return id;
-}
+};

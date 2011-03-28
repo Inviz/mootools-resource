@@ -28,4 +28,4 @@ Resource.Parser.XML = new Class({
     }, this)
     return obj
   }
-})
+});

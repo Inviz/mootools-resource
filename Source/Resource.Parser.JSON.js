@@ -32,4 +32,4 @@ Resource.Parser.JSON = new Class({
     if (type == 'array') return this.array(value, key)
     return value
   }
-})
+});

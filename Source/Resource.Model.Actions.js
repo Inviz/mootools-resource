@@ -80,7 +80,7 @@ Resource.Model.extend({
       method: method
     }, obj));
   }
-})
+});
 
 Object.each(Resource.Model.Actions, function(action, name) {
   Resource.Model.prototype[name] = Resource.Model.createAction(name);

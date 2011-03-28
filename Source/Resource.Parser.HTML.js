@@ -25,4 +25,4 @@ Resource.Parser.HTML = new Class({
   parse: function(c, c, html) {
     return html;
   }
-})
+});
