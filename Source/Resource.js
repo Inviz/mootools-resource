@@ -17,6 +17,7 @@ requires:
   - Core/Events
   - Core/Chain
   - String.Inflections/String.camelize
+  - Ext/Request.Auto
 
 provides:
   - Resource
@@ -145,7 +146,7 @@ Resource = new Class({
   },
 
   getRequest: function() {
-    return new Request[this.options.format.toUpperCase()](this.options.request)
+    return new Request.Auto(this.options.request)
   },
   
   create: function(a, b) { //Ruby-style Model#create backward compat
@@ -248,7 +249,7 @@ Resource = new Class({
   },
   
   format: function(string) {
-    return string.replace(/(?=\?)|\/?$/, '.' + this.options.format)
+    return string;
   }
 });
 
