@@ -22,7 +22,7 @@ provides:
 Resource.Parser.HTML = new Class({
   Extends: Resource.Parser,
   
-  parse: function(c, c, html) {
+  parse: function(a, b, html) {
     return html;
   }
 });
