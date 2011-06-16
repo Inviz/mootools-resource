@@ -22,7 +22,7 @@ provides:
 Resource.Model.Actions = {
   save: function() {
     if (!this._new_record) return Resource.Model.Actions.update.call(this)
-    return {method: 'post', route: 'list', data: this.getData, onComplete: this.set.bind(this), onFailure: this.onFailure.bind(this)}
+    return {method: 'post', route: 'list', attributes: true, onComplete: this.set.bind(this), onFailure: this.onFailure.bind(this)}
   },
   
   destroy: function() {
@@ -30,7 +30,7 @@ Resource.Model.Actions = {
   },
   
   update: function() {
-    return {method: 'put', data: this.getPrefixedClean, route: 'show'}
+    return {method: 'put', attributes: true, route: 'show'}
   },
   
   reload: function() {
@@ -39,7 +39,7 @@ Resource.Model.Actions = {
   },
   
   'new': function() {
-    return {method: 'get', route: 'new', data: this.getPrefixedClean}
+    return {method: 'get', route: 'new', attributes: true}
   }
 };
 
@@ -50,8 +50,15 @@ Resource.Model.extend({
     if (!options.action) options.action = Resource.Model.Actions[name];
     return function() {
       var args = Array.prototype.slice.call(arguments, 0);
-      if (args.getLast()) var callback = args.pop();
+      if (typeof args[args.length - 1] == 'function') var callback = args.pop();
       Object.append(options, options.action.apply(this, args));
+      if (options.arguments !== false) {
+        for (var i = 0, arg, j = args.length; i < j; i++) {
+          if (arg == args[i]) {
+            Object.append(options, arg.parseQueryString ? arg.parseQueryString() : arg);
+          }
+        }
+      }
       this.fireEvent('before' + name.capitalize());
       var req = this.request(options, callback);
       return req.chain(function(data) {
@@ -70,11 +77,10 @@ Resource.Model.extend({
     }
     if (!this.options.urls[name]) this.options.urls[name] = '/:plural/:id/' + name
     return Resource.Model.createAction(name, Object.append({
-      action: function (data) {
-        return {
-          onComplete: method == 'put' ? this.set.bind(this) : $lambda,
-          data: data
-        }
+      action: function () {
+        var options = {data: true}
+        if (method == 'put') options.onComplete = this.set.bind(this);
+        return options;
       },
       route: name, 
       method: method

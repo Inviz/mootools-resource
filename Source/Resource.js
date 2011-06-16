@@ -164,7 +164,9 @@ Resource = new Class({
   
   request: function(options, callback, model) {
     if (options.route) options.url = this.getFormattedURL(options.route, options);
-    if (options.data && options.data.call) options.data = options.data.call(model)
+    if (options.data && options.data.call) options.data = options.data.call(model);
+    if (options.attributes) 
+      options.data = options.data ? Object.merge(options.data, this.getData()) : this.getData();
     
     var req = this.getRequest();
     ['success', 'failure', 'request', 'complete'].each(function(e) {
@@ -186,7 +188,6 @@ Resource = new Class({
             }
           }
         }
-
         if (options[cc]) options[cc](data);
         if (e == 'success') this.callChain(data);
         model.fireEvent(e, data);
