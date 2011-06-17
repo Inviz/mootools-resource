@@ -166,7 +166,7 @@ Resource = new Class({
     if (options.route) options.url = this.getFormattedURL(options.route, options);
     if (options.data && options.data.call) options.data = options.data.call(model);
     if (options.attributes) 
-      options.data = options.data ? Object.merge(options.data, this.getData()) : this.getData();
+      options.data = options.data ? Object.merge(options.data, model.getData()) : model.getData();
     
     var req = this.getRequest();
     ['success', 'failure', 'request', 'complete'].each(function(e) {

@@ -54,8 +54,13 @@ Resource.Model.extend({
       Object.append(options, options.action.apply(this, args));
       if (options.arguments !== false) {
         for (var i = 0, arg, j = args.length; i < j; i++) {
-          if (arg == args[i]) {
-            Object.append(options, arg.parseQueryString ? arg.parseQueryString() : arg);
+          if ((arg = args[i])) {
+            if (arg.parseQueryString) {
+              if (!options.data) options.data = {};
+              Object.append(options.data, arg.parseQueryString())
+            } else {
+              this.set(arg);
+            }
           }
         }
       }
