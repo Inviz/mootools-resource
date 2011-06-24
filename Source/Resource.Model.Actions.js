@@ -83,7 +83,7 @@ Resource.Model.extend({
     if (!this.options.urls[name]) this.options.urls[name] = '/:plural/:id/' + name
     return Resource.Model.createAction(name, Object.append({
       action: function () {
-        var options = {data: true}
+        var options = {}
         if (method == 'put') options.onComplete = this.set.bind(this);
         return options;
       },

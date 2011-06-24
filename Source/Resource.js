@@ -146,7 +146,7 @@ Resource = new Class({
   },
 
   getRequest: function() {
-    return new Request.Auto(this.options.request)
+    return this.options.getRequest ? this.options.getRequest.call(this, this.options.request) : new Request.Auto(this.options.request)
   },
   
   create: function(a, b) { //Ruby-style Model#create backward compat
@@ -167,7 +167,6 @@ Resource = new Class({
     if (options.data && options.data.call) options.data = options.data.call(model);
     if (options.attributes) 
       options.data = options.data ? Object.merge(options.data, model.getData()) : model.getData();
-    
     var req = this.getRequest();
     ['success', 'failure', 'request', 'complete'].each(function(e) {
       var cc = 'on' + e.capitalize()
@@ -236,7 +235,7 @@ Resource = new Class({
   
   getURL: function(route, thing) {
     var prefix = thing.prefix || (this.options.prefix && this.options.prefix.call ? this.options.prefix(thing) : this.options.prefix);
-    var route = (this.options.urls[route] || route);
+    var route = (this.options.urls[route] || (this.options.urls.show + '/' + route));
     if (route.charAt(0) == '/' && prefix.charAt(prefix.length - 1) == '/') prefix = prefix.substring(0, prefix.length - 1);
     return Resource.interpolate(prefix + route, thing, this.options)
   },
@@ -246,7 +245,7 @@ Resource = new Class({
   },
    
   getFormattedURL: function(route, thing) {
-    return this.format(this.getURL(route, thing))
+    return this.format(this.getURL(route, thing || {}))
   },
   
   format: function(string) {
