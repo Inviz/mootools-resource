@@ -22,7 +22,7 @@ provides:
 Resource.Model.Actions = {
   save: function() {
     if (!this._new_record) return Resource.Model.Actions.update.call(this)
-    return {method: 'post', route: 'list', attributes: true, onComplete: this.set.bind(this), onFailure: this.onFailure.bind(this)}
+    return {method: 'post', route: 'index', attributes: true, onComplete: this.set.bind(this), onFailure: this.onFailure.bind(this)}
   },
   
   destroy: function() {

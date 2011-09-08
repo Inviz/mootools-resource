@@ -32,7 +32,7 @@ Resource = new Class({
   options: {
     format: 'json',
     urls: {
-      'list': '/:plural',
+      'index': '/:plural',
       'show': '/:plural/:id',
       'destroy': '/:plural/:id',
       'new': '/:plural/new'
@@ -163,7 +163,7 @@ Resource = new Class({
   },
   
   request: function(options, callback, model) {
-    if (options.route) options.url = this.getFormattedURL(options.route, options);
+    if (options.route) options.url = this.getFormattedURL(options.route, model);
     if (options.data && options.data.call) options.data = options.data.call(model);
     if (options.attributes) 
       options.data = options.data ? Object.merge(options.data, model.getData()) : model.getData();
@@ -222,7 +222,7 @@ Resource = new Class({
     }
     switch (id) {
       case 'first': return this.find('all', callback)
-      case 'all': return this.request({method: 'get', route: 'list', data: params}, callback);
+      case 'all': return this.request({method: 'get', route: 'index', data: params}, callback);
       default: return this.request({method: 'get', route: 'show', data: params, id: id}, callback);
     }
   },

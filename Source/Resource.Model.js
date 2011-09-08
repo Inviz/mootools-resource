@@ -97,7 +97,7 @@ Resource.Model = new Class({
   },
   
   request: function(options, callback) {
-    return this.resource.request(Object.append(this.getClean(), options), callback, this)
+    return this.resource.request(options, callback, this)
   },
   
   getClean: function(){
